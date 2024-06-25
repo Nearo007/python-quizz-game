@@ -1,6 +1,3 @@
-# Leandro 24-04 final
-
-import threading
 import random
 
 def main():
@@ -29,21 +26,10 @@ def main():
 
                 random.shuffle(perguntas_respostas_todas)
 
-                for i in range(5):
+                for i in range(10):
                     perguntas_respostas_final.append(perguntas_respostas_todas[i])
 
                 return perguntas_respostas_final
-
-            def selecionar_dificuldade(dificuldade):
-                tempo_resposta = 10
-
-                if dificuldade == 2:
-                    tempo_resposta = 12
-
-                elif dificuldade == 3:
-                    tempo_resposta = 15
-
-                return tempo_resposta
 
             modo_player = int(input("\nBem-vindo ao jogo de perguntas e respostas!\nQuantos jogadores:\n"))
             modo_dificuldade = int(input("Dificuldade: 1, 2 ou 3?\n"))
@@ -55,8 +41,6 @@ def main():
             if modo_categoria == 2:
                 pergunta_categoria = str(input("Qual categoria? (Ciência, História, Matemática, Português)\n"))
                 pergunta_categoria = pergunta_categoria.lower().strip()
-
-            tempo_resposta = selecionar_dificuldade(modo_dificuldade)
 
             perguntas_respostas_sem_filtro = [
                     # Perguntas portugues facil
@@ -209,17 +193,9 @@ def main():
             perguntas_respostas = selecionar_perguntas(perguntas_respostas_sem_filtro)
 
             for vez in range(modo_player):
-                def obter_resposta():
-                    respostas_usuario.append(input("\nSua resposta: "))
-
                 pontos = 0 # Zera os pontos
                 acertos = 0 # Zera os acertos
                 erros = 0 # Zera os erros
-
-                if modo_player == 1:
-                    print(f"Você tem {tempo_resposta} segundos para cada pergunta:\n")
-                else:
-                    print(f"PLAYER {vez + 1}\nVocê tem {tempo_resposta} segundos para cada pergunta:\n")
 
                 for p in range(len(perguntas_respostas)):
                     print(perguntas_respostas[p].pergunta)
@@ -227,42 +203,28 @@ def main():
                     if modo_dica == 2:
                         print(f"Dica: {perguntas_respostas[p].dica}")
 
-                    respostas_usuario.clear()  # limpa a lista de resposta
+                    palpite = input("Resposta: ")
+                    palpite = palpite.strip().lower()
+                    if palpite == perguntas_respostas[p].resposta.lower():
+                        erros = 0                    
+                        if acertos < 2:
+                            acertos += 1
+                        pontos += 1
+                        if modo_estudo == 2:
+                            print("Correto!\n")
+                        else:
+                            print("Correto! Ganhou um ponto.\n")
 
-                    t = threading.Thread(target=obter_resposta)
-                    t.start()
-                    t.join(timeout=tempo_resposta)  # espera 10 segundo pra resposta
-
-                    if respostas_usuario:
-                        palpite = respostas_usuario[0].strip().lower()
-                        if palpite == perguntas_respostas[p].resposta.lower():
-                            erros = 0                    
-                            if acertos < 2:
-                                acertos += 1
-                            pontos += 1
-                            if modo_estudo == 2:
-                                print("Correto!\n")
-                            else:
-                                print("Correto! Ganhou um ponto.\n")
-
-                        elif palpite != perguntas_respostas[p].resposta.lower():
-                            acertos = 0
-                            if erros < 2:
-                                erros += 1
-                            if pontos > 0:
-                                pontos -= 1
-                            if modo_estudo == 2:
-                                print(f"Incorreto! A resposta era {perguntas_respostas[p].resposta}.\n")
-                            else:
-                                print(f"Incorreto! Perdeu um ponto.\n")
                     else:
                         acertos = 0
                         if erros < 2:
-                            erros += 1  
+                            erros += 1
+                        if pontos > 0:
+                            pontos -= 1
                         if modo_estudo == 2:
-                            print(f"\nTempo esgotado! A resposta era {perguntas_respostas[p].resposta}.\n")
+                            print(f"Incorreto! A resposta era {perguntas_respostas[p].resposta}.\n")
                         else:
-                            print("\nTempo esgotado! Você não respondeu a tempo.\n")
+                            print(f"Incorreto! Perdeu um ponto.\n")
 
                     if modo_dificuldade_adaptativa == 2 and acertos == 2 and modo_dificuldade < 3:
                         acertos = 0
@@ -275,8 +237,6 @@ def main():
                         modo_dificuldade -= 1
                         perguntas_respostas = selecionar_perguntas(perguntas_respostas_sem_filtro)
                         print("\nDificuldade diminuida!\n")
-
-                    tempo_resposta = selecionar_dificuldade(modo_dificuldade)
 
                 if modo_player == 1:
                     if modo_estudo != 2:
